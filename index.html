@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+        }
+
+        header {
+            text-align: center;
+            padding: 20px;
+        }
+
+        .logo img {
+            max-width: 200px;
+            height: auto;
+        }
+
+        .topnav {
+            background-color: rgb(2, 2, 39);
+            color: white;
+            display: flex;
+
+            justify-content: space-between;
+        }
+
+        .secondSection {
+            display: flex;
+
+            justify-content: space-between;
+        }
+
+        h1 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        p {
+            font-size: 14px;
+            margin: 0;
+        }
+
+        .container {
+            border: 1px solid #ccc;
+            padding: 20px;
+            width: 750px;
+        }
+        .content{
+            width: 700px;
+           margin-left: 30px;
+        }
+
+        h1,
+        h2 {
+            color: #333;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 8px;
+        }
+
+        input[type="text"],
+        input[type="email"],
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ccc;
+            box-sizing: border-box;
+        }
+
+        input[type="checkbox"],
+        input[type="radio"] {
+            margin-right: 5px;
+        }
+
+        .photo-upload {
+            text-align: center;
+            padding: 10px;
+            border: 1px dashed #ccc;
+        }
+
+        .form-section {
+            margin-top: 20px;
+            padding: 20px;
+        }
+.passport{
+    opacity: 0;
+    z-index: -1;
+    position: absolute;
+}
+.passport-photo input[type="file"] {
+  opacity: 0;
+  width: 100%;
+  height: 100%; /* Match the height of the .passport-photo container */
+  position: absolute;
+  top: 0;
+  left: 0;
+  cursor: pointer; /* Change cursor to indicate clickable area */
+}
+        .passport-photo {
+            width: 100px;
+            text-align: center;
+            border-style: dotted;
+            border-width: 1px;
+            font-size: smaller;
+            margin-top: 5px;
+            margin-left: 30px;
+            margin-right: 10px;
+            height: 110px;
+            position: absolute;
+  top: 110px;
+background-color: white;
+      left:880px;     
+  
+      
+        }
+   
+
+        
+
+        .text {
+            font-size: smaller;
+            color: gray;
+            display: flex;
+            justify-content: center;
+            padding-top: 3px;
+        }
+        .secondSection1{
+            padding-top: 10px;
+        }
+        .secondSection2{
+            display: flex;
+            justify-content: center; 
+            font-size:19px;
+            font:bold;
+            background-color: rgb(206, 199, 199);
+            margin: 10px;
+            padding: 2px;
+        }
+
+        .personal-details {
+            background-color: rgb(2, 2, 39);
+            color:white;
+            position: relative;
+            padding: 10px;
+            margin-top: 5px;
+            z-index: -1;
+            border-radius: 10px 10px 0px 0px;
+        }
+        .passporttext{
+            padding-top: 20px;
+color:rgb(167, 155, 155);
+font-size: small;
+text-justify: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+        }
+        .commonText{
+           font-size: small; 
+           color: gray;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="container">
+        <!-- topnav section -->
+        <div class="topnav">
+            <div> <img src="images\1image.jpeg" alt="Your Image 1" width="300" height="70"></div>
+            <div> <img src="images\2image.jpeg" alt="Your Image 1" width="300" height="70"></div>
+        </div>
+        <div class="content">
+        <!-- passport size photo with data section -->
+        <div class="secondSection">
+            <div class="secondSection1">
+                <div class="text">Registered Address: Edelweiss House, Off CST Road, Kalina, Mumbai-400098</div>
+                <div class="text">Corporate Site: www.nuvama.com | Business Associate Site: partners.nuvamawealth.com
+                </div>
+
+                <div class="secondSection2">Business Associate Empanelment Form for Distribution Business</div>
+            </div>
+            <div>
+                <div class="passport-photo">
+                    <label for="passporttext" class="passporttext">(Attach Recent Passport Size Photograph here)</label>
+                    <input type="file" id="passport" accept="image/*" required>
+                </div>
+         
+            </div>
+         
+        </div>
+        <div class="personal-details">Personal Details</div>
+
+
+
+        <!-- personal details section -->
+       
+        <table>
+            <tr>
+                <td class="commonText">Name of Business Associate:</td>
+                <td colspan="3"><input type="text" name="businessName"></td>
+            </tr>
+            <tr>
+                <td colspan="4" class="commonText">Communication Address</td>
+            </tr>
+            <tr>
+                <td class="commonText">Contact No:</td>
+                <td><input type="text" name="contactNo"></td>
+                <td class="commonText">Pin Code:</td>
+                <td><input type="text" name="pincode"></td>
+            </tr>
+            <tr>
+                <td class="commonText">City:</td>
+                <td><input type="text" name="city"></td>
+                <td class="commonText">State:</td>
+                <td><input type="text" name="state"></td>
+            </tr>
+            <tr>
+                <td class="commonText">Off:</td>
+                <td><input type="text" name="off"></td>
+                <td class="commonText">Mobile:</td>
+                <td><input type="text" name="mobile"></td>
+            </tr>
+            <tr>
+                <td class="commonText">Email:</td>
+                <td colspan="3"><input type="email" name="email"></td>
+            </tr>
+            <tr>
+                <td colspan="4" class="commonText">Permanent Address</td>
+            </tr>
+            <tr>
+                <td colspan="4" class="commonText"> (If correspondence address is different from permanent address provide address proof
+                    for both.) </td>
+            </tr>
+            <tr>
+                <td class="commonText">City:</td>
+                <td><input type="text" name="permCity"></td>
+                <td class="commonText">Pin Code:</td>
+                <td><input type="text" name="permPincode"></td>
+            </tr>
+            <tr>
+                <td class="commonText">State:</td>
+                <td colspan="3"><input type="text" name="permState"></td>
+            </tr>
+        </table>
+
+        <table>
+            <tr>
+                <td class="commonText">Contact Person Name:</td>
+                <td colspan="3"><input type="text" name="contactPersonName"></td>
+            </tr>
+            <tr>
+                <td class="commonText">Contact No:</td>
+                <td><input type="text" name="contactPersonNo"></td>
+                <td class="commonText">Off:</td>
+                <td><input type="text" name="contactPersonOff"></td>
+            </tr>
+            <tr>
+                <td class="commonText">Status of Applicant:</td>
+                <td class="commonText"><input type="checkbox" name="status" value="individual" > Individual</td>
+                <td class="commonText"><input type="checkbox" name="status" value="soleProp" > Sole Prop</td>
+                <td class="commonText"><input type="checkbox" name="status" value="partnership" > Partnership</td>
+            </tr>
+           
+        </table>
+    </div>
+    </div>
+</body>
+
+</html>
