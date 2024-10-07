@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Face Liveness Check with MediaPipe</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/face_mesh.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@mediapipe/camera_utils/camera_utils.js"></script>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: #f0f0f0;
+            margin: 0;
+        }
+
+        .video-container {
+            position: relative;
+            width: 800px;
+            height: 1100px;
+            overflow: hidden;
+            background: #FFFFFF;
+            border-radius: 50% / 60%;
+        }
+        video,
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 50% / 60%;
+        }
+
+        #remove-snapshot {
+            display: none;
+        }
+
+        #message {
+            margin-top: 20px;
+            color: red;
+            font-weight: bold;
+            display: none;
+            animation: blink 1s steps(2, start) infinite;
+        }
+
+        #snapshot {
+            margin-top: 20px;
+            border: 2px solid #ccc;
+            display: none;
+        }
+
+        #faceOval {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: calc(100% - 100px);
+    height: calc((100% - 100px) * 0.75);
+    border: 2px solid red;
+    border-radius: 50% / 60%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+}
+
+        @keyframes blink {
+            to {
+                visibility: hidden;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Face Liveness Check</h1>
+
+    <div class="container mt-5">
+       
+        <div class="row">
+            <div class="">
+                <div id="video-container" class="video-container mb-3">
+                    <video id="video" width="800" height=" 1100" autoplay></video>
+                    <canvas id="canvas" width="800" height="1100"></canvas>
+                    <div id="faceOval"></div>
+                </div>
+                <div id="message" class="text-center mb-3">Please ensure your face is straight and filling 30% of the
+                    frame</div>
+                <img id="snapshot" src="" alt="Snapshot" class="img-fluid mb-3">
+                <!-- <div class="text-center">
+                    <button id="remove-snapshot" class="btn btn-primary block" >Remove Snapshot</button>
+                </div> -->
+            </div>
+        </div>
+    </div>
+    <script>
+        const videoElement = document.getElementById('video');
+        const canvasElement = document.getElementById('canvas');
+        const canvasCtx = canvasElement.getContext('2d');
+        const message = document.getElementById('message');
+        const snapshot = document.getElementById('snapshot');
+        let imageCaptured = false;
+        let blinkCount = 0;
+
+        const faceMesh = new FaceMesh({
+            locateFile: (file) => {
+                return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
+            }
+        });
+
+        faceMesh.setOptions({
+            maxNumFaces: 1,
+            refineLandmarks: true,
+            minDetectionConfidence: 0.5,
+            minTrackingConfidence: 0.5
+        });
+
+        faceMesh.onResults(onResults);
+
+        const camera = new Camera(videoElement, {
+            onFrame: async () => {
+                await faceMesh.send({ image: videoElement });
+            },
+            width: 640,
+            height: 480
+        });
+        camera.start();
+
+        // function onResults(results) {
+        //     if (imageCaptured) return;
+
+        //     canvasCtx.save();
+        //     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+        //     canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+        //     if (results.multiFaceLandmarks) {
+        //         for (const landmarks of results.multiFaceLandmarks) {
+        //             // Draw points
+        //             for (let i = 0; i < landmarks.length; i++) {
+        //                 const x = landmarks[i].x * canvasElement.width;
+        //                 const y = landmarks[i].y * canvasElement.height;
+        //                 canvasCtx.beginPath();
+        //                 canvasCtx.fillStyle = '#FF0000';
+        //                 canvasCtx.arc(x, y, 2, 0, 2 * Math.PI);
+        //                 canvasCtx.fill();
+        //             }
+
+        //             // Check perpendicular intersecting lines
+        //             const areLinesPerpendicular = checkPerpendicularLines(canvasCtx, landmarks);
+        //             const isFaceSizeCorrect = checkFaceSize(landmarks);
+
+        //             if (areLinesPerpendicular && isFaceSizeCorrect) {
+        //                 message.style.display = 'block';
+        //                 if (blinkCount >= 2) { // Blink 3 times (1s per blink)
+        //                     message.style.display = 'none';
+        //                     captureImage();
+        //                     imageCaptured = true;
+        //                 } else {
+        //                     blinkCount++;
+        //                 }
+        //             } else {
+        //                 message.style.display = 'none';
+        //                 blinkCount = 0;
+        //             }
+
+        //             // Draw inverted triangle between center lines of both eyes and jaw line
+        //             drawInvertedTriangle(canvasCtx, landmarks, 33, 263, 152);
+
+        //             // Draw face oval connector
+        //             drawFaceOvalConnector(canvasCtx, landmarks);
+
+        //             // Log all coordinates and angle results to console
+        //             logResults(landmarks);
+        //         }
+        //     }
+        //     canvasCtx.restore();
+        // }
+        document.getElementById('remove-snapshot').addEventListener('click', function () {
+            snapshot.src = null;
+            snapshot.style.display = 'none';
+            document.getElementById('video-container').style.display = 'block';
+            document.getElementById('remove-snapshot').style.display = 'none';
+            imageCaptured = false; // Reset imageCaptured flag
+            camera.stop(); // Stop the camera
+            camera.start(); // Restart the camera
+        });
+        function onResults(results) {
+            if (imageCaptured) return;
+
+            canvasCtx.save();
+            canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
+            canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
+
+            if (results.multiFaceLandmarks) {
+                for (const landmarks of results.multiFaceLandmarks) {
+                    // Draw points
+                    for (let i = 0; i < landmarks.length; i++) {
+                        const x = landmarks[i].x * canvasElement.width;
+                        const y = landmarks[i].y * canvasElement.height;
+                        canvasCtx.beginPath();
+                        canvasCtx.fillStyle = '#FF0000';
+                        canvasCtx.arc(x, y, 2, 0, 2 * Math.PI);
+                        canvasCtx.fill();
+                    }
+
+                    // Check if face size is correct
+                    const areLinesPerpendicular = checkPerpendicularLines(canvasCtx, landmarks);
+                    const isFaceSizeCorrect = checkFaceSize(landmarks);
+
+                    // Automatically capture image if face is correctly sized
+                    if (areLinesPerpendicular && isFaceSizeCorrect ) {
+                        if (blinkCount >= 2) { // Blink 3 times (1s per blink)
+                            message.style.display = 'none';
+                            captureImage();
+                            imageCaptured = true;
+                        } else {
+                            blinkCount++;
+                        }
+                    } else {
+                        message.style.display = 'block';
+                    }
+
+                    // Draw face oval connector
+                    drawFaceOvalConnector(canvasCtx, landmarks);
+                }
+            }
+            canvasCtx.restore();
+        }
+
+        function checkPerpendicularLines(ctx, landmarks) {
+          // Calculate angles between lines
+const horizontalLineAngle = Math.atan2(rightEyeY - leftEyeY, rightEyeX - leftEyeX);
+const verticalLineAngle = Math.atan2(chinY - eyesCenterY, noseTipX - noseTipX);
+const mouthLineAngle = Math.atan2(lowerLipY - upperLipY, lowerLipX - upperLipX);
+
+const angleDiff1 = Math.abs(horizontalLineAngle - verticalLineAngle);
+const angleDiff2 = Math.abs(mouthLineAngle - verticalLineAngle);
+
+console.log('Coordinates:');
+console.log('Left Eye:', leftEyeX, leftEyeY);
+console.log('Right Eye:', rightEyeX, rightEyeY);
+console.log('Nose Tip:', noseTipX, noseTipY);
+console.log('Upper Lip:', upperLipX, upperLipY);
+console.log('Lower Lip:', lowerLipX, lowerLipY);
+console.log('Chin:', chinX, chinY);
+
+console.log('Angles:');
+console.log('Horizontal Line Angle:', horizontalLineAngle);
+console.log('Vertical Line Angle:', verticalLineAngle);
+console.log('Mouth Line Angle:', mouthLineAngle);
+
+console.log(Math.abs(angleDiff1 - Math.PI/2) <= 0.05 && Math.abs(angleDiff2 - Math.PI/2) <= 0.05 && withinMargin,"final")
+
+return (Math.abs(angleDiff1 - Math.PI/2) <= 0.05 && Math.abs(angleDiff2 - Math.PI/2) <= 0.05 && withinMargin);
+        }
+
+        function checkFaceSize(landmarks) {
+            // Define landmarks for the top of the forehead and bottom of the chin
+            const topOfForehead = landmarks[10];
+            const bottomOfChin = landmarks[152];
+
+            // Calculate the size of the face
+            const faceHeight = (bottomOfChin.y - topOfForehead.y) * canvasElement.height;
+            const videoHeight = canvasElement.height;
+
+            // Check if face height is approximately 50% of the video height
+            const faceSizeRatio = faceHeight / videoHeight;
+            return faceSizeRatio >= 0.30 && faceSizeRatio <= 0.85;
+        }
+
+        function drawInvertedTriangle(ctx, landmarks, index1, index2, index3) {
+            const point1 = landmarks[index1];
+            const point2 = landmarks[index2];
+            const point3 = landmarks[index3];
+            const point1X = point1.x * canvasElement.width;
+            const point1Y = point1.y * canvasElement.height;
+            const point2X = point2.x * canvasElement.width;
+            const point2Y = point2.y * canvasElement.height;
+            const point3X = point3.x * canvasElement.width;
+            const point3Y = point3.y * canvasElement.height;
+
+            ctx.strokeStyle = '#FFA500';
+            ctx.lineWidth = 2;
+
+            // Draw inverted triangle
+            ctx.beginPath();
+            ctx.moveTo(point1X, point1Y);
+            ctx.lineTo(point2X, point2Y);
+            ctx.lineTo(point3X, point3Y);
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function drawFaceOvalConnector(ctx, landmarks) {
+            const faceOvalPoints = [10, 338, 297, 332, 284, 251, 389, 356, 454, 323, 361, 288, 397, 365, 379, 378, 400, 377, 152, 148, 176, 149, 150, 136, 172, 58, 132, 93, 234, 127, 162, 21, 54, 103, 67, 109];
+
+            ctx.strokeStyle = '#FF0000';
+            ctx.lineWidth = 2;
+
+            ctx.beginPath();
+            for (let i = 0; i < faceOvalPoints.length; i++) {
+                const point = landmarks[faceOvalPoints[i]];
+                const x = point.x * canvasElement.width;
+                const y = point.y * canvasElement.height;
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            }
+            ctx.closePath();
+            ctx.stroke();
+        }
+
+        function logResults(landmarks) {
+            console.log('Landmarks:');
+            for (let i = 0; i < landmarks.length; i++) {
+                console.log(`Point ${i}:`, landmarks[i].x * canvasElement.width, landmarks[i].y * canvasElement.height);
+            }
+        }
+
+        function captureImage() {
+            const snapshotCanvas = document.createElement('canvas');
+            snapshotCanvas.width = canvasElement.width;
+            snapshotCanvas.height = canvasElement.height;
+            const snapshotCtx = snapshotCanvas.getContext('2d');
+            snapshotCtx.drawImage(videoElement, 0, 0, snapshotCanvas.width, snapshotCanvas.height);
+            const dataUrl = snapshotCanvas.toDataURL('image/png');
+            snapshot.src = dataUrl;
+            snapshot.style.display = 'block';
+            document.getElementById('video-container').style.display = 'none';
+            document.getElementById('remove-snapshot').style.display = 'block';
+        }
+    </script>
+</body>
+
+</html>
